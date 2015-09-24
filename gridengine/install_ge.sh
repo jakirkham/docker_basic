@@ -1,26 +1,25 @@
 #!/bin/bash
 
-export "${@}"
 export USER=$(whoami)
 export SGE_CONFIG_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export SGE_ROOT=/var/lib/gridengine
+export SGE_ROOT=$SGE_CONFIG_DIR
 echo $SGE_CONFIG_DIR
 sed -i -r "s/^(127.0.0.1\s)(localhost\.localdomain\slocalhost)/\1localhost localhost.localdomain ${HOSTNAME} /" /etc/hosts
 cp /etc/resolv.conf /etc/resolv.conf.orig
 echo "domain ${HOSTNAME}" >> /etc/resolv.conf
 # Update everything.
-apt-get -y update -qq
-echo "gridengine-master shared/gridenginemaster string ${HOSTNAME}" | debconf-set-selections
-echo "gridengine-master shared/gridenginecell string default" | debconf-set-selections
-echo "gridengine-master shared/gridengineconfig boolean true" | debconf-set-selections
-apt-get -y install gridengine-common gridengine-master
-# Do this in a separate step to give master time to start
-apt-get -y install ${DRMAA_PACKAGE} gridengine-client gridengine-exec
+yum -y update -q
+yum -y install epel-release
+yum -y install gridengine gridengine-devel gridengine-qmaster gridengine-execd libdrmaa.so.1.0
+export CORES=$(grep -c '^processor' /proc/cpuinfo)
+cp $SGE_CONFIG_DIR/util/arch $SGE_CONFIG_DIR/util/arch.orig
+sed -i 's/osrelease="`$UNAME -r`"/osrelease="2.6.1"/g' $SGE_CONFIG_DIR/util/arch
+(cd $SGE_CONFIG_DIR && ./inst_sge -x -m -auto ./docker_configuration.conf)
 cp ${SGE_ROOT}/default/common/act_qmaster ${SGE_ROOT}/default/common/act_qmaster.orig
 echo $HOSTNAME > ${SGE_ROOT}/default/common/act_qmaster
-service gridengine-master restart
-service gridengine-exec restart
-export CORES=$(grep -c '^processor' /proc/cpuinfo)
+service sgemaster restart
+service sge_execd restart
+source $SGE_CONFIG_DIR/default/common/settings.sh
 cp $SGE_CONFIG_DIR/user.conf.tmpl $SGE_CONFIG_DIR/user.conf
 sed -i -r "s/template/${USER}/" $SGE_CONFIG_DIR/user.conf
 qconf -suserl | xargs -r -I {} qconf -du {} arusers
@@ -42,8 +41,8 @@ qconf -sql | xargs -r qconf -dq
 qconf -spl | grep -v "make" | xargs -r qconf -dp
 qconf -Ap $SGE_CONFIG_DIR/batch.conf
 qconf -Aq $SGE_CONFIG_DIR/queue.conf
-service gridengine-master restart
-service gridengine-exec restart
+service sgemaster restart
+service sge_execd restart
 echo "Printing queue info to verify that things are working correctly."
 qstat -f -q all.q -explain a
 echo "You should see sge_execd and sge_qmaster running below:"
@@ -84,9 +83,9 @@ set +e
 popd &>/dev/null
 rm -rf /tmp/test_gridengine &>/dev/null
 # Put everything back the way it was.
-service gridengine-exec stop
-service gridengine-master stop
+service sge_execd stop
+service sgemaster stop
 cp /etc/resolv.conf.orig /etc/resolv.conf
 cp ${SGE_ROOT}/default/common/act_qmaster.orig ${SGE_ROOT}/default/common/act_qmaster
-# Clean apt-get so we don't have a bunch of junk left over from our build.
-apt-get clean
+# Clean yum so we don't have a bunch of junk left over from our build.
+yum clean all

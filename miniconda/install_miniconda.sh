@@ -1,19 +1,19 @@
 #!/bin/bash
 
 # Install curl to download the miniconda setup script.
-apt-get install -y curl
+yum install -y curl
 
 # Install VCS.
-apt-get install -y git mercurial subversion
+yum install -y git hg svn
 
-# Install bzip2 and tar. Needed for decompressing packages.
-apt-get install -y bzip2 tar
+# Install bzip2.
+yum install -y bzip2 tar
 
 # Install dependencies of conda's Qt4.
-apt-get install -y libSM6 libXext6 libXrender1
+yum install -y libSM libXext libXrender
 
-# Clean out apt-get.
-apt-get clean
+# Clean out yum.
+yum clean all
 
 # Download and configure conda.
 cd /usr/share/miniconda
