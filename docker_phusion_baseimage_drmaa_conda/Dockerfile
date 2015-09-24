@@ -2,7 +2,8 @@ FROM phusion/baseimage:0.9.17
 MAINTAINER John Kirkham <jakirkham@gmail.com>
 
 
-RUN apt-get update -y && apt-get clean
+RUN apt-get update -y && \
+    apt-get clean
 
 ADD gridengine /usr/share/gridengine
 RUN /usr/share/gridengine/install_ge.sh
