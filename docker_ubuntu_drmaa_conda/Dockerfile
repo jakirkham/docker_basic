@@ -6,7 +6,7 @@ RUN apt-get update -y && \
     apt-get clean
 
 ADD gridengine /usr/share/gridengine
-RUN /usr/share/gridengine/install_ge.sh
+RUN /usr/share/gridengine/install_ge.sh DRMAA_PACKAGE="libdrmaa1.0"
 
 ENV SGE_CONFIG_DIR=/usr/share/gridengine \
     SGE_ROOT=/var/lib/gridengine \
