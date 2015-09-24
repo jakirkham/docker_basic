@@ -2,7 +2,8 @@ FROM ubuntu:12.04
 MAINTAINER John Kirkham <jakirkham@gmail.com>
 
 
-RUN apt-get update -y && apt-get clean
+RUN apt-get update -y && \
+    apt-get clean
 
 ADD gridengine /usr/share/gridengine
 RUN /usr/share/gridengine/install_ge.sh
@@ -20,6 +21,7 @@ ENV PATH=/opt/conda/bin:$PATH \
     CONDA_ENV_PATH=/opt/conda
 
 ADD docker /usr/share/docker
+RUN /usr/share/docker/install_tini.sh
 
-ENTRYPOINT [ "/usr/share/docker/entrypoint.sh" ]
+ENTRYPOINT [ "/usr/bin/tini", "--", "/usr/share/docker/entrypoint.sh" ]
 CMD [ "/bin/bash" ]
