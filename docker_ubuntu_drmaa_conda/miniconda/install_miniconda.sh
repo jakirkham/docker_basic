@@ -24,9 +24,13 @@ source activate root
 
 # Install basic conda dependencies.
 conda update -y --all
+conda install -y pycrypto
 conda install -y conda-build
-conda install -y binstar
+conda install -y anaconda-client
 conda install -y jinja2
+
+# Install drmaa to provide Python support for DRMAA.
+conda install -y drmaa
 
 # Clean out all unneeded intermediates.
 conda clean -yitps
