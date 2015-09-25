@@ -5,6 +5,9 @@ MAINTAINER John Kirkham <jakirkham@gmail.com>
 RUN apt-get update -y && \
     apt-get clean
 
+ENV GRIDENGINE_EXEC=gridengine-exec \
+    GRIDENGINE_MASTER=gridengine-master
+
 ADD gridengine /usr/share/gridengine
 RUN /usr/share/gridengine/install_ge.sh DRMAA_PACKAGE="libdrmaa1.0"
 
