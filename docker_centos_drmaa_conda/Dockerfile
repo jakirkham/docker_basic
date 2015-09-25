@@ -6,6 +6,9 @@ RUN echo "exclude=*.i386 *.i686" >> /etc/yum.conf && \
     yum update -y && \
     yum clean all
 
+ENV GRIDENGINE_EXEC=sge_execd \
+    GRIDENGINE_MASTER=sgemaster
+
 ADD gridengine /usr/share/gridengine
 RUN /usr/share/gridengine/install_ge.sh
 
